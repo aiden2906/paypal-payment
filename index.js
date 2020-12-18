@@ -4,7 +4,6 @@ const paypal = require('paypal-rest-sdk');
 const app = express();
 const path = require('path');
 const items = require('./item.json');
-const fs = require('fs');
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -22,7 +21,12 @@ app.get('/', (req, res) => {
 });
 
 app.post('/pay', (req, res) => {
-  var create_payment_json = {
+  const itemss = items.map(i => {
+    delete i.description;
+    delete i.src;
+    return i;
+  })
+  const create_payment_json = {
     intent: 'sale',
     payer: {
       payment_method: 'paypal',
@@ -34,28 +38,22 @@ app.post('/pay', (req, res) => {
     transactions: [
       {
         item_list: {
-          items: [
-            {
-              name: 'item',
-              sku: 'item',
-              price: '1.00',
-              currency: 'USD',
-              quantity: 1,
-            },
-          ],
+          items: itemss,
         },
         amount: {
           currency: 'USD',
-          total: '1.00',
+          total: items.reduce((c, i) => c + i.quantity * i.price, 0) + '',
         },
-        description: 'This is the payment description.',
+        description: 'The payment transaction description.',
       },
     ],
   };
 
   paypal.payment.create(create_payment_json, function (error, payment) {
     if (error) {
-      res.render('cancel.handlebars');
+      res.render('cancel.ejs', {
+        error: error.response.details,
+      });
     } else {
       const redirect_url = payment.links.find((i) => i.rel === 'approval_url').href;
       if (redirect_url) {
@@ -66,18 +64,18 @@ app.post('/pay', (req, res) => {
 });
 
 app.get('/cancel', function (req, res) {
-  res.render('cancel.handlebars');
+  res.render('cancel.ejs');
 });
 
 app.get('/success', (req, res) => {
   const { PayerID: payer_id, paymentId: payment_id } = req.query;
-  var execute_payment_json = {
+  const execute_payment_json = {
     payer_id,
     transactions: [
       {
         amount: {
           currency: 'USD',
-          total: '1.00',
+          total: items.reduce((c, i) => c + i.quantity * i.price, 0) + '',
         },
       },
     ],
@@ -85,9 +83,9 @@ app.get('/success', (req, res) => {
 
   paypal.payment.execute(payment_id, execute_payment_json, function (error, payment) {
     if (error) {
-      app.render('cancel.handlebars');
+      res.render('cancel.ejs');
     } else {
-      res.render('success.handlebars');
+      res.render('success.ejs');
     }
   });
 });
