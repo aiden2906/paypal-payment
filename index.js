@@ -1,30 +1,35 @@
+require('dotenv').config();
 const express = require('express');
 const paypal = require('paypal-rest-sdk');
 const app = express();
-const fs = require('fs');
 const path = require('path');
-const PORT = 3000;
-const BASE_URL = 'http://localhost:3000';
+const items = require('./item.json');
+const fs = require('fs');
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 paypal.configure({
-  mode: 'sandbox',
-  client_id: 'AaqMWtRUWg04_HBVeXN4kWQxYTgL6vOXOVEXYudHfWByO_TlrarP77wPL60uCdEHVbbDPCKuZyUSru1Q',
-  client_secret: 'ECVZfSVx1vOhAsyiPxNmSRojk7_EtL6lZTQHbxFtWJ07Yo2BSHHd7fIE-3TLYN6gWQDL5miv5tRMqQC0',
+  mode: process.env.PAYPAL_MODE,
+  client_id: process.env.PAYPAL_CLIENT_ID,
+  client_secret: process.env.PAYPAL_CLIENT_SECRET,
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.render('index.ejs', {
+    items,
+  });
 });
 
-app.get('/pay', (req, res) => {
+app.post('/pay', (req, res) => {
   var create_payment_json = {
     intent: 'sale',
     payer: {
       payment_method: 'paypal',
     },
     redirect_urls: {
-      return_url: `${BASE_URL}/success`,
-      cancel_url: `${BASE_URL}/failed`,
+      return_url: `${process.env.BASE_URL}/success`,
+      cancel_url: `${process.env.BASE_URL}/cancel`,
     },
     transactions: [
       {
@@ -50,7 +55,7 @@ app.get('/pay', (req, res) => {
 
   paypal.payment.create(create_payment_json, function (error, payment) {
     if (error) {
-      throw error;
+      res.render('cancel.handlebars');
     } else {
       const redirect_url = payment.links.find((i) => i.rel === 'approval_url').href;
       if (redirect_url) {
@@ -58,6 +63,10 @@ app.get('/pay', (req, res) => {
       }
     }
   });
+});
+
+app.get('/cancel', function (req, res) {
+  res.render('cancel.handlebars');
 });
 
 app.get('/success', (req, res) => {
@@ -76,14 +85,13 @@ app.get('/success', (req, res) => {
 
   paypal.payment.execute(payment_id, execute_payment_json, function (error, payment) {
     if (error) {
-      console.log(error.response);
-      throw error;
+      app.render('cancel.handlebars');
     } else {
-      res.send(payment);
+      res.render('success.handlebars');
     }
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Example app listening at http://localhost:${PORT}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Example app listening at http://localhost:${process.env.PORT}`);
 });

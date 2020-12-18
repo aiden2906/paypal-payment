@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Iphone 11 Pro Max",
+    "sku": "JTUEJ37HY47",
+    "src": "https://cdn1.viettelstore.vn/images/Product/ProductImage/medium/1992615027.jpeg",
+    "price": "12999000",
+    "currency": "vnđ",
+    "quantity": 2,
+    "description": "Thiết kế iPhone 11 không khác nhiều so với các thông tin được rò rỉ trước đó. Và điều khiến tôi thất vọng nhất trong thiết kế là mặt trước. Apple vẫn trung thành với màn hình “tai thỏ”. Trong khi đó các dòng điện thoại cao cấp Android đã sử dụng màn hình notch, màn hình không viền vô cùng ấn tượng. Ngoài ra, một điểm trừ nữa trong thiết kế iPhone 11 là các cạnh viền vẫn còn rất dày tương tự iPhone XR."
+  },
+  {
+    "name": "Apple Watch series 6",
+    "sku": "JTUEJ37HY48",
+    "src": "https://didongviet.vn/pub/media/catalog/product//a/p/apple-watch-series-5-40mm-gold_4.jpg",
+    "price": "10599000",
+    "currency": "vnđ",
+    "quantity": 1,
+    "description": "Apple Watch Series 5 là thiết bị đeo tay cao cấp đẹp hoàn toàn. Di Động Việt cam kết hàng chính hãng. Apple Watch Series đem đến hiệu năng mạnh mẽ như phát hiện tự động ngã, tự động gọi cấp cứu."
+  }
+]
